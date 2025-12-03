@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.db.models import Q, Max
+from django.http import HttpResponseForbidden
 from .models import Chat, Message
 from .forms import MessageForm
 from organizations.models import Company, Cooperative
@@ -11,8 +12,21 @@ from organizations.models import Company, Cooperative
 @login_required
 def chat_list(request):
     """Lista todos los chats del usuario"""
-    # Obtener todos los chats donde el usuario es participante
-    chats = Chat.objects.filter(participants=request.user).annotate(
+    # Obtener chats donde el usuario tiene acceso dinámico
+    user_company = getattr(request.user.profile, 'company', None)
+    
+    # 1. Chats directos (donde es participante)
+    direct_chats = Q(type='direct', participants=request.user)
+    
+    # 2. Chats de su empresa
+    company_chats = Q(type='company', company=user_company) if user_company else Q(pk__in=[])
+    
+    # 3. Chats de cooperativas donde su empresa es miembro
+    cooperative_chats = Q(type='cooperative', cooperative__companies=user_company) if user_company else Q(pk__in=[])
+    
+    chats = Chat.objects.filter(
+        direct_chats | company_chats | cooperative_chats
+    ).distinct().annotate(
         last_message_time=Max('messages__created_at')
     ).order_by('-last_message_time')
     
@@ -54,6 +68,18 @@ def chat_detail(request, chat_id):
         'form': form
     }
     return render(request, 'messaging/chat_detail.html', context)
+
+
+@login_required
+def chat_messages(request, chat_id):
+    """Vista parcial para obtener mensajes (HTMX polling)"""
+    chat = get_object_or_404(Chat, id=chat_id)
+    
+    if not chat.user_can_access(request.user):
+        return HttpResponseForbidden()
+    
+    chat_messages = chat.messages.all().order_by('created_at')
+    return render(request, 'messaging/partials/message_list.html', {'chat_messages': chat_messages, 'user': request.user})
 
 
 @login_required

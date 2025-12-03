@@ -1,119 +1,64 @@
+{% extends 'base.html' %}
 {% load crispy_forms_tags %}
-<!DOCTYPE html>
-<html lang="es" data-bs-theme="dark">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Perfil - CoopConnect</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <style>
-        body {
-            background-color: #000000;
-        }
-        .navbar-custom {
-            background-color: rgba(0, 0, 0, 0.95);
-            border-bottom: 1px solid #2f3336;
-        }
-        .card-custom {
-            background-color: #16181c;
-            border: 1px solid #2f3336;
-            border-radius: 15px;
-        }
-        .avatar-preview {
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 3px solid #1d9bf0;
-        }
-    </style>
-</head>
-<body>
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom sticky-top">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="{% url 'dashboard' %}">
-                <i class="bi bi-diagram-3-fill text-primary"></i> CoopConnect
-            </a>
-            <div class="collapse navbar-collapse">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'dashboard' %}">
-                            <i class="bi bi-arrow-left"></i> Volver al Dashboard
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
 
-    <div class="container mt-5">
-        <div class="row justify-content-center">
-            <div class="col-lg-8">
-                <div class="card-custom p-5">
-                    <h2 class="mb-4">
-                        <i class="bi bi-person-circle text-primary"></i> Mi Perfil
-                    </h2>
+{% block title %}Mi Perfil - CoopConnect{% endblock %}
 
-                    {% if messages %}
-                        {% for message in messages %}
-                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                                {{ message }}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                            </div>
-                        {% endfor %}
-                    {% endif %}
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card-custom p-5">
+                <h2 class="mb-4">
+                    <i class="bi bi-person-circle text-primary"></i> Mi Perfil
+                </h2>
 
-                    <!-- Información de Usuario -->
-                    <div class="mb-4">
-                        <h5>Información de Cuenta</h5>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <p><strong>Usuario:</strong> {{ user.username }}</p>
-                                <p><strong>Email:</strong> {{ user.email }}</p>
-                            </div>
-                            <div class="col-md-6">
-                                <p><strong>Fecha de Registro:</strong> {{ user.date_joined|date:"d/m/Y" }}</p>
-                                {% if user.profile.company %}
-                                    <p><strong>Empresa:</strong> {{ user.profile.company.name }}</p>
-                                {% endif %}
-                            </div>
+                <!-- Información de Usuario -->
+                <div class="mb-4">
+                    <h5>Información de Cuenta</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Usuario:</strong> {{ user.username }}</p>
+                            <p><strong>Email:</strong> {{ user.email }}</p>
                         </div>
-                    </div>
-
-                    <hr class="my-4">
-
-                    <!-- Formulario de Perfil -->
-                    <h5 class="mb-3">Actualizar Perfil</h5>
-                    <form method="post" enctype="multipart/form-data">
-                        {% csrf_token %}
-                        
-                        <!-- Vista previa del avatar -->
-                        <div class="text-center mb-4">
-                            {% if user.profile.avatar %}
-                                <img src="{{ user.profile.avatar.url }}" alt="Avatar" class="avatar-preview">
-                            {% else %}
-                                <i class="bi bi-person-circle" style="font-size: 150px; color: #1d9bf0;"></i>
+                        <div class="col-md-6">
+                            <p><strong>Fecha de Registro:</strong> {{ user.date_joined|date:"d/m/Y" }}</p>
+                            {% if user.profile.company %}
+                            <p><strong>Empresa:</strong> {{ user.profile.company.name }}</p>
                             {% endif %}
                         </div>
-
-                        {{ form|crispy }}
-                        
-                        <div class="d-grid gap-2 mt-4">
-                            <button type="submit" class="btn btn-primary btn-lg">
-                                <i class="bi bi-check-circle"></i> Guardar Cambios
-                            </button>
-                            <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">
-                                Cancelar
-                            </a>
-                        </div>
-                    </form>
+                    </div>
                 </div>
+
+                <hr class="my-4">
+
+                <!-- Formulario de Perfil -->
+                <h5 class="mb-3">Actualizar Perfil</h5>
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    <!-- Vista previa del avatar -->
+                    <div class="text-center mb-4">
+                        {% if user.profile.avatar %}
+                        <img src="{{ user.profile.avatar.url }}" alt="Avatar" class="avatar-preview"
+                            style="width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 3px solid #1d9bf0;">
+                        {% else %}
+                        <i class="bi bi-person-circle" style="font-size: 150px; color: #1d9bf0;"></i>
+                        {% endif %}
+                    </div>
+
+                    {{ form|crispy }}
+
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary-custom btn-lg">
+                            <i class="bi bi-check-circle"></i> Guardar Cambios
+                        </button>
+                        <a href="{% url 'dashboard' %}" class="btn btn-outline-light">
+                            Cancelar
+                        </a>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+</div>
+{% endblock %}

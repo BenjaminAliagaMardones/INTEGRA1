@@ -30,7 +30,7 @@ def profile(request):
         if form.is_valid():
             form.save()
             messages.success(request, '¡Perfil actualizado exitosamente!')
-            return redirect('profile')
+            return redirect('accounts:profile')
     else:
         form = ProfileUpdateForm(instance=request.user.profile)
     

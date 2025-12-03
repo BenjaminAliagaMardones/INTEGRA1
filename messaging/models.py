@@ -32,7 +32,17 @@ class Chat(models.Model):
 
     def user_can_access(self, user):
         """Verificar si un usuario puede acceder al chat"""
-        return self.participants.filter(id=user.id).exists()
+        if self.type == 'direct':
+            return self.participants.filter(id=user.id).exists()
+        elif self.type == 'company':
+            # Acceso si el usuario pertenece a la empresa del chat
+            return hasattr(user, 'profile') and user.profile.company == self.company
+        elif self.type == 'cooperative':
+            # Acceso si la empresa del usuario pertenece a la cooperativa del chat
+            return (hasattr(user, 'profile') and 
+                    user.profile.company and 
+                    self.cooperative.companies.filter(id=user.profile.company.id).exists())
+        return False
 
 
 class Message(models.Model):

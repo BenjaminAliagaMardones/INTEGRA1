@@ -22,7 +22,8 @@ class Company(models.Model):
     name = models.CharField(max_length=200, unique=True, verbose_name='Nombre')
     sector = models.CharField(max_length=50, choices=SECTOR_CHOICES, verbose_name='Sector')
     description = models.TextField(verbose_name='Descripción')
-    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='companies_created')
+    access_code = models.CharField(max_length=20, default='123456', verbose_name='Código de Acceso', help_text='Código para que otros usuarios se unan a tu empresa')
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='companies_created')
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -44,7 +45,7 @@ class Cooperative(models.Model):
     sector = models.CharField(max_length=50, choices=SECTOR_CHOICES, verbose_name='Sector')
     description = models.TextField(verbose_name='Descripción')
     companies = models.ManyToManyField(Company, related_name='cooperatives', blank=True)
-    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='cooperatives_created')
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='cooperatives_created')
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
