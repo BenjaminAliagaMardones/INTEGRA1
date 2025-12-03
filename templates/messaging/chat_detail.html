@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ chat }} - CoopConnect{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card-custom p-4 mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3><i class="bi bi-chat-dots"></i> {{ chat }}</h3>
+            <a href="{% url 'messaging:chat_list' %}" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left"></i> Volver a Chats
+            </a>
+        </div>
+
+        <!-- Área de mensajes -->
+        <div class="card bg-dark border-secondary mb-3" style="height: 500px; overflow-y: auto;" id="chat-messages">
+            <div class="card-body">
+                {% if chat_messages %}
+                    {% for message in chat_messages %}
+                        <div class="mb-3 {% if message.sender == request.user %}text-end{% endif %}">
+                            <div class="d-inline-block p-3 rounded {% if message.sender == request.user %}bg-primary{% else %}bg-secondary{% endif %}" style="max-width: 70%;">
+                                <strong>{{ message.sender.username }}</strong>
+                                <p class="mb-1">{{ message.content }}</p>
+                                <small class="text-muted">{{ message.created_at|timesince }} ago</small>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-center text-muted mt-5">No hay mensajes todavía. ¡Sé el primero en escribir!</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Formulario para enviar mensaje -->
+        <form method="post" class="mt-3">
+            {% csrf_token %}
+            <div class="input-group">
+                {{ form.content }}
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-send"></i> Enviar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Auto-scroll al último mensaje
+    const chatMessages = document.getElementById('chat-messages');
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+</script>
+{% endblock %}

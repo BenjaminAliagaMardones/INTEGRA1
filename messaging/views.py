@@ -33,7 +33,7 @@ def chat_detail(request, chat_id):
         return redirect('messaging:chat_list')
     
     # Obtener todos los mensajes del chat
-    chat_messages = chat.messages.all().order_by('timestamp')
+    chat_messages = chat.messages.all().order_by('created_at')
     
     # Procesar formulario de envío de mensaje
     if request.method == 'POST':
@@ -50,7 +50,7 @@ def chat_detail(request, chat_id):
     
     context = {
         'chat': chat,
-        'messages': chat_messages,
+        'chat_messages': chat_messages,
         'form': form
     }
     return render(request, 'messaging/chat_detail.html', context)
@@ -92,7 +92,8 @@ def create_company_chat(request, company_id):
     company = get_object_or_404(Company, id=company_id)
     
     # Verificar que el usuario sea miembro de la empresa
-    if not company.members.filter(id=request.user.id).exists():
+    # company.members son Profiles, verificamos si el perfil del usuario tiene esta empresa
+    if not hasattr(request.user, 'profile') or request.user.profile.company != company:
         messages.error(request, 'Debes ser miembro de la empresa para acceder a su chat.')
         return redirect('organizations:company_detail', pk=company_id)
     
@@ -125,8 +126,12 @@ def create_cooperative_chat(request, cooperative_id):
     cooperative = get_object_or_404(Cooperative, id=cooperative_id)
     
     # Verificar que el usuario sea miembro de alguna empresa de la cooperativa
-    user_companies = Company.objects.filter(members=request.user)
-    if not cooperative.companies.filter(id__in=user_companies).exists():
+    # members son Profiles, verificamos si el perfil del usuario tiene empresa en la cooperativa
+    user_company = None
+    if hasattr(request.user, 'profile'):
+        user_company = request.user.profile.company
+    
+    if not user_company or not cooperative.companies.filter(id=user_company.id).exists():
         messages.error(request, 'Debes ser miembro de una empresa asociada para acceder al chat.')
         return redirect('organizations:cooperative_detail', pk=cooperative_id)
     
