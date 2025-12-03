@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="es" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - CoopConnect</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #000000;
+            color: #e7e9ea;
+        }
+        .navbar-custom {
+            background-color: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #2f3336;
+        }
+        .card-custom {
+            background-color: #16181c;
+            border: 1px solid #2f3336;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+        }
+        .card-custom:hover {
+            border-color: #1d9bf0;
+            transform: translateY(-5px);
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #1d9bf0, #0d6efd);
+            border: none;
+            border-radius: 15px;
+            color: white;
+        }
+        .btn-primary-custom {
+            background-color: #1d9bf0;
+            border: none;
+            border-radius: 50px;
+        }
+        .btn-primary-custom:hover {
+            background-color: #1a8cd8;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom sticky-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'dashboard' %}">
+                <i class="bi bi-diagram-3-fill text-primary"></i> CoopConnect
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{% url 'dashboard' %}">
+                            <i class="bi bi-house"></i> Inicio
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'organizations:company_list' %}">
+                            <i class="bi bi-building"></i> Empresas
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'organizations:cooperative_list' %}">
+                            <i class="bi bi-diagram-3"></i> Cooperativas
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            <i class="bi bi-chat-dots"></i> Mensajes
+                        </a>
+                    </li>
+                </ul>
+
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-person-circle"></i> {{ user.username }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end bg-dark">
+                            <li><a class="dropdown-item" href="{% url 'accounts:profile' %}">
+                                <i class="bi bi-person"></i> Mi Perfil
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'accounts:logout' %}">
+                                <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
+                            </a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mt-4">
+        <!-- Welcome Section -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h2>¡Bienvenido, {{ user.username }}! 👋</h2>
+                <p class="text-muted">Gestiona tu empresa y colabora con otras PYMEs</p>
+            </div>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- Stats Cards -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-4">
+                <div class="card stat-card p-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="mb-0">{{ companies_count }}</h3>
+                            <p class="mb-0">Empresas</p>
+                        </div>
+                        <i class="bi bi-building" style="font-size: 3rem; opacity: 0.3;"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card stat-card p-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="mb-0">{{ cooperatives_count }}</h3>
+                            <p class="mb-0">Cooperativas</p>
+                        </div>
+                        <i class="bi bi-diagram-3" style="font-size: 3rem; opacity: 0.3;"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card stat-card p-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="mb-0">{{ user_chats_count }}</h3>
+                            <p class="mb-0">Mis Chats</p>
+                        </div>
+                        <i class="bi bi-chat-dots" style="font-size: 3rem; opacity: 0.3;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="card-custom p-4 h-100">
+                    <h5 class="mb-3">
+                        <i class="bi bi-building text-primary"></i> Mi Empresa
+                    </h5>
+                    {% if profile.company %}
+                        <div class="mb-3">
+                            <h6>{{ profile.company.name }}</h6>
+                            <p class="text-muted mb-0">
+                                <span class="badge bg-primary">{{ profile.company.get_sector_display }}</span>
+                            </p>
+                        </div>
+                        <a href="{% url 'organizations:company_detail' profile.company.id %}" class="btn btn-outline-light btn-sm">Ver Detalles</a>
+                    {% else %}
+                        <p class="text-muted">No perteneces a ninguna empresa aún.</p>
+                        <a href="{% url 'organizations:company_create' %}" class="btn btn-primary-custom">
+                            <i class="bi bi-plus-circle"></i> Crear Empresa
+                        </a>
+                        <a href="{% url 'organizations:company_list' %}" class="btn btn-outline-light">
+                            <i class="bi bi-search"></i> Buscar Empresa
+                        </a>
+                    {% endif %}
+
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card-custom p-4 h-100">
+                    <h5 class="mb-3">
+                        <i class="bi bi-diagram-3 text-primary"></i> Cooperativas
+                    </h5>
+                    <p class="text-muted">
+                        Únete a cooperativas de tu sector para colaborar con otras empresas.
+                    </p>
+                    <a href="{% url 'organizations:cooperative_list' %}" class="btn btn-primary-custom">
+                        <i class="bi bi-search"></i> Explorar Cooperativas
+                    </a>
+                </div>
+            </div>
+
+            <div class="col-md-12">
+                <div class="card-custom p-4">
+                    <h5 class="mb-3">
+                        <i class="bi bi-chat-dots text-primary"></i> Mensajería
+                    </h5>
+                    {% if user_chats_count > 0 %}
+                        <p class="text-muted">Tienes {{ user_chats_count }} chat{{ user_chats_count|pluralize }} activo{{ user_chats_count|pluralize }}.</p>
+                        <a href="{% url 'messaging:chat_list' %}" class="btn btn-primary-custom">
+                            <i class="bi bi-chat-dots"></i> Ver Chats
+                        </a>
+                    {% else %}
+                        <p class="text-muted">No tienes chats aún. Únete a una empresa o cooperativa para comenzar a chatear.</p>
+                        <a href="{% url 'messaging:chat_list' %}" class="btn btn-outline-light">
+                            <i class="bi bi-chat-dots"></i> Mis Chats
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="mt-5 py-4 border-top border-secondary">
+        <div class="container text-center text-muted">
+            <p class="mb-0">&copy; 2025 CoopConnect. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
